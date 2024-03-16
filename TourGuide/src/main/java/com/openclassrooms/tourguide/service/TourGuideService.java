@@ -9,6 +9,7 @@ import com.openclassrooms.tourguide.user.UserReward;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -83,12 +84,42 @@ public class TourGuideService {
 		return providers;
 	}
 
-	public VisitedLocation trackUserLocation(User user) throws ExecutionException, InterruptedException {
+//	public VisitedLocation trackUserLocation(User user) throws ExecutionException, InterruptedException {
+//		VisitedLocation visitedLocation = gpsUtil.getUserLocation(user.getUserId());
+//		user.addToVisitedLocations(visitedLocation);
+//		rewardsService.calculateRewards(user);
+//		return visitedLocation;
+//	}
+
+	public void trackAllUserLocation() {
+		List<User> allUsers = getAllUsers();
+		List<CompletableFuture<Void>> futures = new ArrayList<>();
+
+		for (User user : allUsers) {
+			CompletableFuture<Void> future = CompletableFuture.runAsync(() -> trackUserLocation(user));
+			futures.add(future);
+		}
+
+		futures.forEach(CompletableFuture::join);
+
+	}
+
+
+
+	/**
+	 * Add the current location to the user and update the rewards with the new location
+	 *
+	 * @param user to track location
+	 * @return the current location
+	 */
+	public VisitedLocation trackUserLocation(User user) {
 		VisitedLocation visitedLocation = gpsUtil.getUserLocation(user.getUserId());
+		logger.info("Adding the current location to the user "+user.getUserName());
 		user.addToVisitedLocations(visitedLocation);
 		rewardsService.calculateRewards(user);
 		return visitedLocation;
 	}
+
 
 //	public List<Attraction> getNearByAttractions(VisitedLocation visitedLocation) {
 //		List<Attraction> nearbyAttractions = new ArrayList<>();

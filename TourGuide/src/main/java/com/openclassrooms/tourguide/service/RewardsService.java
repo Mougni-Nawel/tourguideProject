@@ -1,7 +1,9 @@
 package com.openclassrooms.tourguide.service;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.*;
 
 import org.springframework.stereotype.Service;
@@ -25,7 +27,7 @@ public class RewardsService {
 	private final GpsUtil gpsUtil;
 	private final RewardCentral rewardsCentral;
 
-	ExecutorService executorService = Executors.newFixedThreadPool(100);
+	ExecutorService executorService = Executors.newFixedThreadPool(900);
 
 	public RewardsService(GpsUtil gpsUtil, RewardCentral rewardCentral) {
 		this.gpsUtil = gpsUtil;
@@ -75,38 +77,90 @@ public class RewardsService {
 //
 //	}
 
-	public void calculateRewards(User user) {
-		CopyOnWriteArrayList<Attraction> attractions = new CopyOnWriteArrayList<>(gpsUtil.getAttractions());
+// RIGHT ONE
+//	public void calculateRewards(User user) {
+//		CopyOnWriteArrayList<Attraction> attractions = new CopyOnWriteArrayList<>(gpsUtil.getAttractions());
+//
+//		List<CompletableFuture<Void>> futures = new ArrayList<>();
+//
+//		attractions.stream().forEach((a) -> {
+//				UserRewardRunnable runnable = new UserRewardRunnable(user, this, a);
+//
+//				CompletableFuture<Void> future = CompletableFuture.runAsync(runnable, executorService);
+//
+//				futures.add(future);
+//			}
+//
+//		);
+//
+//
+//
+//		// Wait for all CompletableFuture tasks to complete
+//		CompletableFuture<Void> allOf = CompletableFuture.allOf(futures.toArray(new CompletableFuture[futures.size()]));
+//
+//
+//		// Chain a callback to execute after all tasks are completed
+//		allOf.thenRun(() -> {
+//			// This code block executes when all tasks are completed
+////			System.out.println("All tasks completed");
+////			System.out.println("USER : " + user.getUserRewards().size());
+//		}).exceptionally(ex -> {
+//			// Handle exceptions
+//			ex.printStackTrace();
+//			return null;
+//		}).join();
+//	}
 
+	public void calculateRewards(User user) {
+		List<VisitedLocation> userLocations = new ArrayList<>(user.getVisitedLocations());
+		List<Attraction> attractions = new ArrayList<>(gpsUtil.getAttractions());
+		List<UserReward> existingRewards = new ArrayList<>(user.getUserRewards());
+		attractions.removeIf(attraction -> existingRewards.stream()
+				.anyMatch(reward -> reward.attraction.attractionName.equals(attraction.attractionName)));
+
+		Set<String> alreadyRewardedAttractionName = new HashSet<>();
+		for (UserReward alreadyRewarded : user.getUserRewards().stream().toList()) {
+			alreadyRewardedAttractionName.add(alreadyRewarded.attraction.attractionName);
+		}
+
+		//List<UserReward> rewardsToAdd = new ArrayList<>();
+		for (VisitedLocation visitedLocation : userLocations) {
+			for (Attraction attraction : attractions) {
+				if (nearAttraction(visitedLocation, attraction)) {
+					UserReward reward = new UserReward(visitedLocation, attraction, getRewardPoints(attraction, user));
+					if (!alreadyRewardedAttractionName.contains(reward.attraction.attractionName)) {
+						user.addUserReward(reward);
+						alreadyRewardedAttractionName.add(reward.attraction.attractionName);
+					}
+				}
+			}
+		}
+	}
+
+
+	public void calculateRewardsForAllUsers(List<User> users) {
+		//logger.info("calculating rewards for "+users.size()+" users");
 		List<CompletableFuture<Void>> futures = new ArrayList<>();
 
-		attractions.stream().forEach((a) -> {
-				UserRewardRunnable runnable = new UserRewardRunnable(user, this, a);
+		users.forEach(user -> futures.add(CompletableFuture.runAsync(() -> calculateRewards(user), executorService)));
 
-				CompletableFuture<Void> future = CompletableFuture.runAsync(runnable, executorService);
-
-				futures.add(future);
-			}
-
-		);
-
-
-
-		// Wait for all CompletableFuture tasks to complete
-		CompletableFuture<Void> allOf = CompletableFuture.allOf(futures.toArray(new CompletableFuture[futures.size()]));
-
-
-		// Chain a callback to execute after all tasks are completed
-		allOf.thenRun(() -> {
-			// This code block executes when all tasks are completed
-			System.out.println("All tasks completed");
-			System.out.println("USER : " + user.getUserRewards().size());
-		}).exceptionally(ex -> {
-			// Handle exceptions
-			ex.printStackTrace();
-			return null;
-		}).join();
+		futures.forEach(CompletableFuture::join);
 	}
+
+//	public void calculateRewards(User user) {
+//		List<Attraction> attractions = new CopyOnWriteArrayList<>(gpsUtil.getAttractions());
+//
+//		attractions.parallelStream()
+//				.forEach(attraction -> {
+//					UserRewardRunnable runnable = new UserRewardRunnable(user, this, attraction);
+//					CompletableFuture.runAsync(runnable, executorService)
+//							.join();
+//				});
+//
+//		// After all tasks are completed
+//		// System.out.println("All tasks completed");
+//		// System.out.println("USER : " + user.getUserRewards().size());
+//	}
 
 
 //	public void getUserRewards(List<VisitedLocation> userLocations, List<Attraction> attractions, List<UserReward> newRewards, User user){

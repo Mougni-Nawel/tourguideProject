@@ -23,6 +23,7 @@ public class UserRewardRunnable implements Runnable{
         this.attraction = attraction;
     }
 
+    @Override
     public void run() {
         for (VisitedLocation visitedLocation : user.getVisitedLocations()) {
                 if (user.getUserRewards().stream().filter(r -> r.attraction.attractionName.equals(attraction.attractionName)).count() == 0) {
