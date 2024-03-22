@@ -11,6 +11,8 @@ import java.time.ZoneOffset;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -34,6 +36,9 @@ public class TourGuideService {
 	public final Tracker tracker;
 
 	boolean testMode = true;
+
+	ExecutorService executorService = Executors.newFixedThreadPool(900);
+
 
 	public TourGuideService(GpsUtil gpsUtil, RewardsService rewardsService) {
 		this.gpsUtil = gpsUtil;
@@ -96,7 +101,7 @@ public class TourGuideService {
 		List<CompletableFuture<Void>> futures = new ArrayList<>();
 
 		for (User user : allUsers) {
-			CompletableFuture<Void> future = CompletableFuture.runAsync(() -> trackUserLocation(user));
+			CompletableFuture<Void> future = CompletableFuture.runAsync(() -> trackUserLocation(user), executorService);
 			futures.add(future);
 		}
 
