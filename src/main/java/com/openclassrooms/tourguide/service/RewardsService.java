@@ -1,9 +1,6 @@
 package com.openclassrooms.tourguide.service;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.*;
 
 import org.springframework.stereotype.Service;
@@ -128,7 +125,7 @@ public class RewardsService {
 		for (VisitedLocation visitedLocation : userLocations) {
 			for (Attraction attraction : attractions) {
 				if (nearAttraction(visitedLocation, attraction)) {
-					UserReward reward = new UserReward(visitedLocation, attraction, getRewardPoints(attraction, user));
+					UserReward reward = new UserReward(visitedLocation, attraction, getRewardPoints(attraction, user.getUserId()));
 					if (!alreadyRewardedAttractionName.contains(reward.attraction.attractionName)) {
 						user.addUserReward(reward);
 						alreadyRewardedAttractionName.add(reward.attraction.attractionName);
@@ -251,8 +248,8 @@ public class RewardsService {
 		return getDistance(attraction, visitedLocation.location) > proximityBuffer ? false : true;
 	}
 
-	public int getRewardPoints(Attraction attraction, User user) {
-		return rewardsCentral.getAttractionRewardPoints(attraction.attractionId, user.getUserId());
+	public int getRewardPoints(Attraction attraction, UUID user) {
+		return rewardsCentral.getAttractionRewardPoints(attraction.attractionId, user);
 	}
 
 	public double getDistance(Location loc1, Location loc2) {

@@ -140,12 +140,12 @@ public class TourGuideService {
 //		return nearbyAttractions;
 //	}
 
-	public List<Attraction> getNearByAttractions(String username) throws ExecutionException, InterruptedException {
+	public List<Attraction> getNearByAttractions(VisitedLocation visitedLocation) throws ExecutionException, InterruptedException {
 		List<Attraction> nearbyAttractions = new ArrayList<>();
 		List<Double> distanceList = new ArrayList<>();
 
-		User user = getUser(username);
-		VisitedLocation visitedLocation = getUserLocation(user);
+//		User user = getUser(username);
+//		VisitedLocation visitedLocation = getUserLocation(user);
 
 
 
@@ -189,7 +189,7 @@ public class TourGuideService {
 									attractionDTO.setNameAttraction(attraction.attractionName);
 									attractionDTO.setLatUser(visitedLocation.location.latitude);
 									attractionDTO.setLongUser(visitedLocation.location.longitude);
-									attractionDTO.setRewardPoint(rewardsService.getRewardPoints(attraction, user));
+									attractionDTO.setRewardPoint(rewardsService.getRewardPoints(attraction, visitedLocation.userId));
 									nearbyAttractions.add(attractionDTO);
 								}
 							}
