@@ -20,8 +20,11 @@ public class Tracker extends Thread {
 	private final TourGuideService tourGuideService;
 	private boolean stop = false;
 
-	public Tracker(TourGuideService tourGuideService) {
+	private boolean testMode;
+
+	public Tracker(TourGuideService tourGuideService, boolean testMode) {
 		this.tourGuideService = tourGuideService;
+		this.testMode = testMode;
 
 		executorService.submit(this);
 	}
@@ -46,9 +49,11 @@ public class Tracker extends Thread {
 			List<User> users = tourGuideService.getAllUsers();
 			logger.debug("Begin Tracker. Tracking " + users.size() + " users.");
 			stopWatch.start();
-			users.forEach(u -> {
-				tourGuideService.trackUserLocation(u);
-			});
+			if(!testMode){
+				users.forEach(u -> {
+					tourGuideService.trackUserLocation(u);
+				});
+			}
 			stopWatch.stop();
 			logger.debug("Tracker Time Elapsed: " + TimeUnit.MILLISECONDS.toSeconds(stopWatch.getTime()) + " seconds.");
 			stopWatch.reset();

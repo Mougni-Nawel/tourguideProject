@@ -19,11 +19,14 @@ public class User {
 	private CopyOnWriteArrayList<UserReward> userRewards = new CopyOnWriteArrayList<>();
 	private UserPreferences userPreferences = new UserPreferences();
 	private List<Provider> tripDeals = new ArrayList<>();
+	private boolean rewardsCalculated;
+
 	public User(UUID userId, String userName, String phoneNumber, String emailAddress) {
 		this.userId = userId;
 		this.userName = userName;
 		this.phoneNumber = phoneNumber;
 		this.emailAddress = emailAddress;
+		this.rewardsCalculated = false;
 	}
 	
 	public UUID getUserId() {
@@ -98,6 +101,14 @@ public class User {
 	
 	public List<Provider> getTripDeals() {
 		return tripDeals;
+	}
+
+	public boolean areRewardsCalculated() {
+		return rewardsCalculated;
+	}
+
+	public void setRewardsCalculated(boolean rewardsCalculated) {
+		this.rewardsCalculated = rewardsCalculated;
 	}
 
 }

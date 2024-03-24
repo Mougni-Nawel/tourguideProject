@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import gpsUtil.GpsUtil;
@@ -58,11 +57,12 @@ public class TestRewardsService {
 		InternalTestHelper.setInternalUserNumber(1);
 		TourGuideService tourGuideService = new TourGuideService(gpsUtil, rewardsService);
 
-		rewardsService.calculateRewards(tourGuideService.getAllUsers().get(0));
-		List<UserReward> userRewards = tourGuideService.getUserRewards(tourGuideService.getAllUsers().get(0));
+		User getUser = tourGuideService.getAllUsers().get(0);
+
+		rewardsService.calculateRewards(getUser);
+		List<UserReward> userRewards = tourGuideService.getUserRewards(getUser);
 		tourGuideService.tracker.stopTracking();
 
-		//System.out.println("USER : "+userRewards);
 		assertEquals(gpsUtil.getAttractions().size(), userRewards.size());
 	}
 
