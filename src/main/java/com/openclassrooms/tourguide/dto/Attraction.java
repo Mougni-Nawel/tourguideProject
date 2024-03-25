@@ -69,9 +69,4 @@ public class Attraction {
         this.rewardPoint = rewardPoint;
     }
 
-//    public Attraction(Attraction attraction) {
-//        this.nameAttraction = attraction.getNameAttraction();
-//        this.latAttraction = attraction.getLatAttraction();
-//        this.longAttraction = attraction.getLongAttraction();
-//    }
 }

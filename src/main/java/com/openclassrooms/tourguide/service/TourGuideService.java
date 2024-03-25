@@ -90,12 +90,6 @@ public class TourGuideService {
 		return providers;
 	}
 
-//	public VisitedLocation trackUserLocation(User user) throws ExecutionException, InterruptedException {
-//		VisitedLocation visitedLocation = gpsUtil.getUserLocation(user.getUserId());
-//		user.addToVisitedLocations(visitedLocation);
-//		rewardsService.calculateRewards(user);
-//		return visitedLocation;
-//	}
 
 	public void trackAllUserLocation() {
 		List<User> allUsers = getAllUsers();
@@ -127,33 +121,14 @@ public class TourGuideService {
 	}
 
 
-//	public List<Attraction> getNearByAttractions(VisitedLocation visitedLocation) {
-//		List<Attraction> nearbyAttractions = new ArrayList<>();
-//		for (Attraction attraction : gpsUtil.getAttractions()) {
-//			System.out.println("Attractions : "+attraction.toString());
-//			if (rewardsService.isWithinAttractionProximity(attraction, visitedLocation.location)) {
-//				nearbyAttractions.add(attraction);
-//			}
-//			//System.out.println("Liste : "+visitedLocation.location);
-//		}
-//
-//		return nearbyAttractions;
-//	}
-
 	public List<Attraction> getNearByAttractions(VisitedLocation visitedLocation) throws ExecutionException, InterruptedException {
 		List<Attraction> nearbyAttractions = new ArrayList<>();
 		List<Double> distanceList = new ArrayList<>();
-
-//		User user = getUser(username);
-//		VisitedLocation visitedLocation = getUserLocation(user);
-
-
 
 		// get the distance of all the attractions
 		gpsUtil.getAttractions().forEach(
 				e-> {
 					double distance = rewardsService.getDistance(e, visitedLocation.location);
-					//System.out.println("Distance : "+distance);
 					distanceList.add(distance);
 				}
 		);
@@ -181,7 +156,6 @@ public class TourGuideService {
 					gpsUtil.getAttractions().forEach(
 							attraction -> {
 								if(rewardsService.getDistance(attraction, visitedLocation.location) == distance){
-									//System.out.println("REWARD POINT : "+rewardsService.getRewardPoints(attraction, user));
 									Attraction attractionDTO  = new Attraction();
 									attractionDTO.setDistance(distance);
 									attractionDTO.setLatAttraction(attraction.latitude);
